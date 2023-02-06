@@ -10,7 +10,7 @@ const comingSoon = Coming_Soon({
 
 export default function App({ Component, pageProps }: AppProps) {
   return (
-    <main className={`${comingSoon.variable} font-sans`}>
+    <main className={`${comingSoon.variable} font-sans h-full`}>
       <Component {...pageProps} />;
     </main>
   );
