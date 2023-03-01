@@ -12,11 +12,6 @@ import type { Tabs } from "@/models/Tabs";
 import { Gallery } from "@/components/Gallery";
 import { getImages } from "@/utils/image-util";
 
-// type CreateApi = ReturnType<typeof createApi>;
-// type SearchPhotos = CreateApi["search"];
-// type GetPhotos = SearchPhotos["getPhotos"];
-// type PhotoResponse = Awaited<ReturnType<GetPhotos>>;
-
 type HomeProps = {
   oceans: Photo[];
   forests: Photo[];
@@ -36,7 +31,7 @@ export default function Home({ oceans, forests }: HomeProps) {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <Image
-        className="fixed left-0 top-0"
+        className="fixed left-0 top-0 z-0"
         src={bgImagem}
         alt="background-image"
         placeholder="blur"

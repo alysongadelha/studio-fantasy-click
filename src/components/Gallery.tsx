@@ -25,7 +25,7 @@ export const Gallery = ({ photos }: GalleryProps): JSX.Element => {
     <>
       <Masonry breakpointCols={2} className="flex gap-4" columnClassName="">
         {photos.map((photo, index) => (
-          <div className="relative">
+          <div className="relative" key={`div-image-${index}-${photo.src}`}>
             <Image
               key={`image-${index}-${photo.src}`}
               src={photo.src}
