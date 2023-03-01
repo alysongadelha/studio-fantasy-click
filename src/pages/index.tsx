@@ -1,45 +1,32 @@
 import Head from "next/head";
-import Image, { StaticImageData } from "next/image";
+import Image from "next/image";
 import Link from "next/link";
 import { Tab } from "@headlessui/react";
-import { Tabs } from "@/models/Tabs";
-import Masonry from "react-masonry-css";
 import classNames from "classnames";
-import LightGallery from "lightgallery/react";
-
-// import styles
-import "lightgallery/css/lightgallery.css";
-import "lightgallery/css/lg-zoom.css";
-import "lightgallery/css/lg-thumbnail.css";
-
-// import plugins if you need
-import lgThumbnail from "lightgallery/plugins/thumbnail";
-import lgZoom from "lightgallery/plugins/zoom";
-
+import nodeFetch from "node-fetch";
 import bgImagem from "../../public/photography-bg.jpg";
-import ocean1 from "../../public/ocean-01.jpg";
-import ocean2 from "../../public/ocean-02.jpg";
-import ocean3 from "../../public/ocean-03.jpg";
-import ocean4 from "../../public/ocean-04.jpg";
-import ocean5 from "../../public/ocean-05.jpg";
-import ocean6 from "../../public/ocean-06.jpg";
-import { useState } from "react";
+import { GetStaticProps } from "next";
+import { createApi } from "unsplash-js";
+import type { Photo } from "@/models/Photo";
+import type { Tabs } from "@/models/Tabs";
+import { Gallery } from "@/components/Gallery";
+import { getImages } from "@/utils/image-util";
 
-export default function Home() {
-  const [lightBox, setLightBox] = useState<boolean>(false);
+// type CreateApi = ReturnType<typeof createApi>;
+// type SearchPhotos = CreateApi["search"];
+// type GetPhotos = SearchPhotos["getPhotos"];
+// type PhotoResponse = Awaited<ReturnType<GetPhotos>>;
+
+type HomeProps = {
+  oceans: Photo[];
+  forests: Photo[];
+};
+
+export default function Home({ oceans, forests }: HomeProps) {
   const tabs: Tabs[] = [
     { key: "all", display: "All" },
     { key: "oceans", display: "Oceans" },
     { key: "forest", display: "Forest" },
-  ];
-
-  const images: StaticImageData[] = [
-    ocean1,
-    ocean4,
-    ocean3,
-    ocean2,
-    ocean5,
-    ocean6,
   ];
   return (
     <div className="h-full overflow-auto">
@@ -60,7 +47,7 @@ export default function Home() {
           Photography Portfolio
         </span>
         <Link
-          onClick={() => setLightBox(!lightBox)}
+          onClick={() => console.log("Send to WhatsApp")}
           href="#"
           className="rounded-3xl bg-white text-stone-700 px-3 py-2 hover:bg-opacity-90"
         >
@@ -88,47 +75,42 @@ export default function Home() {
             </Tab.List>
             <Tab.Panels className="h-full max-w-[900px] w-full p-2 sm:p-4 my-6">
               <Tab.Panel className="overflow-auto">
-                <Masonry
-                  breakpointCols={2}
-                  className="flex gap-4"
-                  columnClassName=""
-                >
-                  {images.map((image, index) => (
-                    <Image
-                      key={`image-${image.src}`}
-                      src={image}
-                      alt={`image-${index}`}
-                      className="my-4"
-                      placeholder="blur"
-                    />
-                  ))}
-                </Masonry>
-
-                <LightGallery
-                  onInit={() => console.log("initialize")}
-                  speed={500}
-                  plugins={[lgThumbnail, lgZoom]}
-                >
-                  <img alt="img1" src="../../public/ocean-01.jpg" />
-                  <img alt="img2" src="../../public/ocean-02.jpg" />
-                </LightGallery>
+                <Gallery photos={[...oceans, ...forests]} />
               </Tab.Panel>
-              <Tab.Panel>Ocenas</Tab.Panel>
-              <Tab.Panel>Forest</Tab.Panel>
+              <Tab.Panel>
+                <Gallery photos={[...oceans]} />
+              </Tab.Panel>
+              <Tab.Panel>
+                <Gallery photos={forests} />
+              </Tab.Panel>
             </Tab.Panels>
           </Tab.Group>
         </div>
       </main>
-      {lightBox && (
-        <div className="fixed  z-40  bg-white h-full w-full">
-          <div className="w-10/12 align flex align-middle">
-            <Image src={ocean1} alt="test" />
-          </div>
-        </div>
-      )}
       <footer className="relative h-[90px] flex justify-center items-center uppercase text-lg font-medium z-20">
         <p>Photography Portfolio</p>
       </footer>
     </div>
   );
 }
+
+export const getStaticProps: GetStaticProps<HomeProps> = async () => {
+  const unsplash = createApi({
+    accessKey: process.env.UNSPLASH_ACCESS_KEY!,
+    fetch: nodeFetch as unknown as typeof fetch,
+  });
+
+  const [oceans, forests] = await Promise.all([
+    getImages(unsplash, "oceans"),
+    getImages(unsplash, "forests"),
+  ]);
+
+  //   const photos = imagesMock;
+
+  return {
+    props: {
+      oceans,
+      forests,
+    },
+  };
+};
