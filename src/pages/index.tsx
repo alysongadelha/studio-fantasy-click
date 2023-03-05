@@ -8,9 +8,11 @@ import bgImagem from "../../public/photography-bg.jpg";
 import { GetStaticProps } from "next";
 import { createApi } from "unsplash-js";
 import type { Photo } from "@/models/Photo";
-import type { Tabs } from "@/models/Tabs";
 import { Gallery } from "@/components/Gallery";
 import { getImages } from "@/utils/image-util";
+import { tabs } from "@/constants/Tabs";
+import { getInTouch } from "@/utils/get-in-touch";
+import { useMemo } from "react";
 
 type HomeProps = {
   oceans: Photo[];
@@ -18,11 +20,11 @@ type HomeProps = {
 };
 
 export default function Home({ oceans, forests }: HomeProps) {
-  const tabs: Tabs[] = [
-    { key: "all", display: "All" },
-    { key: "oceans", display: "Oceans" },
-    { key: "forest", display: "Forest" },
-  ];
+  const allPhotos = useMemo(() => {
+    const all = [...oceans, ...forests];
+    return all.sort((a, b) => a.likes - b.likes);
+  }, [oceans, forests]);
+
   return (
     <div className="h-full overflow-auto">
       <Head>
@@ -42,7 +44,7 @@ export default function Home({ oceans, forests }: HomeProps) {
           Photography Portfolio
         </span>
         <Link
-          onClick={() => console.log("Send to WhatsApp")}
+          onClick={getInTouch}
           href="#"
           className="rounded-3xl bg-white text-stone-700 px-3 py-2 hover:bg-opacity-90"
         >
@@ -70,7 +72,7 @@ export default function Home({ oceans, forests }: HomeProps) {
             </Tab.List>
             <Tab.Panels className="h-full max-w-[900px] w-full p-2 sm:p-4 my-6">
               <Tab.Panel className="overflow-auto">
-                <Gallery photos={[...oceans, ...forests]} />
+                <Gallery photos={allPhotos} />
               </Tab.Panel>
               <Tab.Panel>
                 <Gallery photos={[...oceans]} />
@@ -107,5 +109,6 @@ export const getStaticProps: GetStaticProps<HomeProps> = async () => {
       oceans,
       forests,
     },
+    revalidate: 10,
   };
 };
